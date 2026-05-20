@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice Exam Scores — Class IX Foundation</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0d0f14;
+    --surface:   #13161e;
+    --surface2:  #1a1e2a;
+    --border:    #252a38;
+    --text:      #e8eaf0;
+    --muted:     #6b7280;
+    --physics:   #38bdf8;
+    --chemistry: #a78bfa;
+    --biology:   #34d399;
+    --maths:     #fb923c;
+    --perfect:   #facc15;
+    --danger:    #f87171;
+    --font-head: 'Syne', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Noise texture overlay ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Layout ── */
+  .wrap { max-width: 1300px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* ── Header ── */
+  header {
+    padding: 48px 0 36px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .header-left h1 {
+    font-family: var(--font-head);
+    font-size: clamp(22px, 4vw, 38px);
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    color: #fff;
+  }
+  .header-left h1 span {
+    background: linear-gradient(90deg, var(--physics), var(--chemistry));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .header-left p {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .header-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.8;
+  }
+  .header-badge strong { color: var(--text); font-size: 18px; display: block; }
+
+  /* ── Stat cards ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 14px;
+    padding: 28px 0 0;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 18px 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent, #555);
+  }
+  .stat-card:hover { border-color: var(--accent, #555); }
+  .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .stat-value {
+    font-family: var(--font-head);
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--accent, #fff);
+    margin: 6px 0 2px;
+    line-height: 1;
+  }
+  .stat-sub {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* ── Subject breakdown ── */
+  .section-title {
+    font-family: var(--font-head);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 36px 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .subject-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 14px;
+  }
+  .subj-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
+  .subj-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    border-color: var(--scolor);
+  }
+  .subj-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .subj-name {
+    font-family: var(--font-head);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--scolor);
+  }
+  .subj-count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--surface2);
+    padding: 3px 8px;
+    border-radius: 100px;
+  }
+  .subj-avg {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+  .subj-avg-num {
+    font-family: var(--font-head);
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .subj-avg-denom {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .subj-bar-track {
+    height: 5px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .subj-bar-fill {
+    height: 100%;
+    background: var(--scolor);
+    border-radius: 4px;
+    transition: width 0.8s cubic-bezier(.4,0,.2,1);
+  }
+  .subj-stats-row {
+    display: flex;
+    gap: 12px;
+  }
+  .subj-mini {
+    flex: 1;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 8px 10px;
+  }
+  .subj-mini-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .subj-mini-val { font-family: var(--font-mono); font-size: 14px; font-weight: 500; color: var(--text); margin-top: 2px; }
+
+  /* ── Controls ── */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    padding: 20px 0 0;
+  }
+  .search-box {
+    flex: 1;
+    min-width: 200px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 14px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-box::placeholder { color: var(--muted); }
+  .search-box:focus { border-color: var(--physics); }
+
+  .filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 7px 14px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover { color: var(--text); border-color: #3a3f50; }
+  .filter-btn.active {
+    color: #fff;
+    background: var(--btn-color, #3a3f50);
+    border-color: var(--btn-color, #3a3f50);
+  }
+
+  .sort-select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 14px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+  }
+  .sort-select option { background: var(--surface2); }
+
+  /* ── Table ── */
+  .table-wrap {
+    margin-top: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead th {
+    background: var(--surface2);
+    padding: 12px 16px;
+    text-align: left;
+    font-family: var(--font-head);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s;
+  }
+  thead th:hover { color: var(--text); }
+  thead th.sorted { color: var(--text); }
+  thead th .sort-icon { margin-left: 4px; opacity: 0.5; font-size: 10px; }
+  thead th.sorted .sort-icon { opacity: 1; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+    animation: rowIn 0.3s ease both;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+
+  @keyframes rowIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  td {
+    padding: 11px 16px;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  .td-id {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    width: 44px;
+  }
+  .subj-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    background: color-mix(in srgb, var(--sc) 12%, transparent);
+    color: var(--sc);
+    border: 1px solid color-mix(in srgb, var(--sc) 25%, transparent);
+  }
+  .subj-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--sc); }
+  .td-topic { color: var(--text); max-width: 260px; }
+  .td-marks {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .marks-bar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .marks-pip-row { display: flex; gap: 2px; }
+  .pip {
+    width: 7px; height: 7px;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background 0.2s;
+  }
+  .pip.filled { background: var(--pc); }
+  .pip.perfect { background: var(--perfect); }
+  .pip.low { background: var(--danger); }
+  .marks-num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    min-width: 30px;
+  }
+  .marks-num.perfect-score { color: var(--perfect); }
+  .marks-num.low-score { color: var(--danger); }
+  .td-time {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .td-qs {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* ── Pagination ── */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .page-info {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+  }
+  .page-btns { display: flex; gap: 6px; }
+  .page-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: var(--text);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--font-body);
+  }
+  .page-btn:hover:not(:disabled) { border-color: var(--physics); color: var(--physics); }
+  .page-btn:disabled { opacity: 0.3; cursor: default; }
+  .page-btn.current {
+    background: var(--physics);
+    border-color: var(--physics);
+    color: #000;
+    font-weight: 600;
+  }
+
+  /* ── Footer ── */
+  footer {
+    padding: 32px 0;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 48px;
+  }
+
+  /* ── Empty state ── */
+  .empty-state {
+    padding: 60px;
+    text-align: center;
+    color: var(--muted);
+  }
+  .empty-state h3 {
+    font-family: var(--font-head);
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="header-left">
+      <h1>Class IX <span>Foundation</span><br>Practice Exam Scores</h1>
+      <p>Brilliant Study Centre, Pala · Chapter 1 MCQ Data</p>
+    </div>
+    <div class="header-badge">
+      <strong id="hdr-total">108</strong>
+      Total entries across<br>4 subjects · Chapter 1
+    </div>
+  </header>
+
+  <!-- Stat Cards -->
+  <div class="stats-grid" id="stat-cards"></div>
+
+  <!-- Subject Breakdown -->
+  <div class="section-title">Subject Overview</div>
+  <div class="subject-cards" id="subject-cards"></div>
+
+  <!-- Controls -->
+  <div class="section-title" style="margin-top:36px">All Records</div>
+  <div class="controls">
+    <input class="search-box" type="text" id="search" placeholder="Search topic or subject…">
+    <div class="filter-group" id="subj-filters"></div>
+    <select class="sort-select" id="sort-select">
+      <option value="id-asc">ID ↑</option>
+      <option value="id-desc">ID ↓</option>
+      <option value="marks-desc">Marks: High → Low</option>
+      <option value="marks-asc">Marks: Low → High</option>
+      <option value="time-asc">Time: Fast → Slow</option>
+      <option value="time-desc">Time: Slow → Fast</option>
+      <option value="subject-asc">Subject A → Z</option>
+    </select>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="th-sort" data-key="id">#<span class="sort-icon">↕</span></th>
+          <th class="th-sort" data-key="subject">Subject<span class="sort-icon">↕</span></th>
+          <th class="th-sort" data-key="topic">Topic<span class="sort-icon">↕</span></th>
+          <th class="th-sort" data-key="questions">Qs<span class="sort-icon">↕</span></th>
+          <th class="th-sort" data-key="marks">Score<span class="sort-icon">↕</span></th>
+          <th class="th-sort" data-key="time_minutes">Time<span class="sort-icon">↕</span></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+  <footer>
+    Class IX Foundation Programme · Physics, Chemistry, Biology, Mathematics · Chapter 1 Practice MCQ Scores
+  </footer>
+</div>
+
+<script>
+const RAW = [{"id":1,"subject":"Physics","topic":"Distance and Displacement","questions":10,"marks":10,"time_minutes":5},{"id":2,"subject":"Physics","topic":"Speed and Velocity","questions":10,"marks":10,"time_minutes":6},{"id":3,"subject":"Physics","topic":"Uniform and Non-Uniform Motion","questions":10,"marks":10,"time_minutes":4},{"id":4,"subject":"Physics","topic":"Acceleration","questions":10,"marks":7,"time_minutes":6},{"id":5,"subject":"Physics","topic":"Equations of Motion","questions":10,"marks":10,"time_minutes":7},{"id":6,"subject":"Physics","topic":"Distance-Time Graphs","questions":10,"marks":10,"time_minutes":5},{"id":7,"subject":"Physics","topic":"Velocity-Time Graphs","questions":10,"marks":10,"time_minutes":6},{"id":8,"subject":"Physics","topic":"Average Speed and Average Velocity","questions":10,"marks":10,"time_minutes":7},{"id":9,"subject":"Physics","topic":"Circular Motion","questions":10,"marks":9,"time_minutes":5},{"id":10,"subject":"Physics","topic":"Relative Motion","questions":10,"marks":10,"time_minutes":6},{"id":11,"subject":"Physics","topic":"Distance and Displacement","questions":10,"marks":10,"time_minutes":4},{"id":12,"subject":"Physics","topic":"Equations of Motion","questions":10,"marks":10,"time_minutes":7},{"id":13,"subject":"Physics","topic":"Uniform and Non-Uniform Motion","questions":10,"marks":10,"time_minutes":5},{"id":14,"subject":"Physics","topic":"Velocity-Time Graphs","questions":10,"marks":10,"time_minutes":6},{"id":15,"subject":"Physics","topic":"Speed and Velocity","questions":10,"marks":10,"time_minutes":5},{"id":16,"subject":"Physics","topic":"Acceleration","questions":10,"marks":10,"time_minutes":7},{"id":17,"subject":"Physics","topic":"Average Speed and Average Velocity","questions":10,"marks":9,"time_minutes":6},{"id":18,"subject":"Physics","topic":"Distance-Time Graphs","questions":10,"marks":10,"time_minutes":4},{"id":19,"subject":"Physics","topic":"Circular Motion","questions":10,"marks":10,"time_minutes":5},{"id":20,"subject":"Physics","topic":"Relative Motion","questions":10,"marks":10,"time_minutes":6},{"id":21,"subject":"Physics","topic":"Equations of Motion","questions":10,"marks":10,"time_minutes":7},{"id":22,"subject":"Physics","topic":"Velocity-Time Graphs","questions":10,"marks":10,"time_minutes":5},{"id":23,"subject":"Physics","topic":"Distance and Displacement","questions":10,"marks":10,"time_minutes":4},{"id":24,"subject":"Physics","topic":"Acceleration","questions":10,"marks":10,"time_minutes":6},{"id":25,"subject":"Physics","topic":"Speed and Velocity","questions":10,"marks":10,"time_minutes":5},{"id":26,"subject":"Physics","topic":"Average Speed and Average Velocity","questions":10,"marks":10,"time_minutes":7},{"id":27,"subject":"Chemistry","topic":"States of Matter","questions":10,"marks":10,"time_minutes":5},{"id":28,"subject":"Chemistry","topic":"Properties of Solids, Liquids and Gases","questions":10,"marks":10,"time_minutes":6},{"id":29,"subject":"Chemistry","topic":"Interparticle Forces and Spaces","questions":10,"marks":10,"time_minutes":4},{"id":30,"subject":"Chemistry","topic":"Changes of State - Melting and Freezing","questions":10,"marks":10,"time_minutes":5},{"id":31,"subject":"Chemistry","topic":"Evaporation and Condensation","questions":10,"marks":6,"time_minutes":6},{"id":32,"subject":"Chemistry","topic":"Latent Heat of Fusion and Vaporisation","questions":10,"marks":10,"time_minutes":7},{"id":33,"subject":"Chemistry","topic":"Effect of Temperature on States of Matter","questions":10,"marks":10,"time_minutes":5},{"id":34,"subject":"Chemistry","topic":"Pure Substances and Mixtures","questions":10,"marks":10,"time_minutes":6},{"id":35,"subject":"Chemistry","topic":"Classification of Matter","questions":10,"marks":10,"time_minutes":4},{"id":36,"subject":"Chemistry","topic":"Effect of Pressure on States of Matter","questions":10,"marks":10,"time_minutes":5},{"id":37,"subject":"Chemistry","topic":"States of Matter","questions":10,"marks":10,"time_minutes":5},{"id":38,"subject":"Chemistry","topic":"Evaporation and Condensation","questions":10,"marks":10,"time_minutes":6},{"id":39,"subject":"Chemistry","topic":"Changes of State - Melting and Freezing","questions":10,"marks":10,"time_minutes":5},{"id":40,"subject":"Chemistry","topic":"Properties of Solids, Liquids and Gases","questions":10,"marks":10,"time_minutes":7},{"id":41,"subject":"Chemistry","topic":"Latent Heat of Fusion and Vaporisation","questions":10,"marks":8,"time_minutes":7},{"id":42,"subject":"Chemistry","topic":"Pure Substances and Mixtures","questions":10,"marks":10,"time_minutes":4},{"id":43,"subject":"Chemistry","topic":"Interparticle Forces and Spaces","questions":10,"marks":10,"time_minutes":5},{"id":44,"subject":"Chemistry","topic":"Classification of Matter","questions":10,"marks":10,"time_minutes":6},{"id":45,"subject":"Chemistry","topic":"Effect of Pressure on States of Matter","questions":10,"marks":10,"time_minutes":5},{"id":46,"subject":"Chemistry","topic":"Effect of Temperature on States of Matter","questions":10,"marks":10,"time_minutes":6},{"id":47,"subject":"Chemistry","topic":"States of Matter","questions":10,"marks":10,"time_minutes":4},{"id":48,"subject":"Chemistry","topic":"Changes of State - Melting and Freezing","questions":10,"marks":10,"time_minutes":5},{"id":49,"subject":"Chemistry","topic":"Evaporation and Condensation","questions":10,"marks":10,"time_minutes":6},{"id":50,"subject":"Chemistry","topic":"Pure Substances and Mixtures","questions":10,"marks":10,"time_minutes":7},{"id":51,"subject":"Chemistry","topic":"Latent Heat of Fusion and Vaporisation","questions":10,"marks":10,"time_minutes":5},{"id":52,"subject":"Chemistry","topic":"Classification of Matter","questions":10,"marks":10,"time_minutes":6},{"id":53,"subject":"Biology","topic":"Cell Theory","questions":10,"marks":10,"time_minutes":4},{"id":54,"subject":"Biology","topic":"Unicellular and Multicellular Organisms","questions":10,"marks":10,"time_minutes":5},{"id":55,"subject":"Biology","topic":"Plant Cell vs Animal Cell","questions":10,"marks":10,"time_minutes":6},{"id":56,"subject":"Biology","topic":"Prokaryotic and Eukaryotic Cells","questions":10,"marks":9,"time_minutes":6},{"id":57,"subject":"Biology","topic":"Cell Organelles - Nucleus","questions":10,"marks":10,"time_minutes":5},{"id":58,"subject":"Biology","topic":"Cell Organelles - Mitochondria and Plastids","questions":10,"marks":10,"time_minutes":7},{"id":59,"subject":"Biology","topic":"Cell Membrane and Cell Wall","questions":10,"marks":10,"time_minutes":4},{"id":60,"subject":"Biology","topic":"Endoplasmic Reticulum and Ribosomes","questions":10,"marks":10,"time_minutes":6},{"id":61,"subject":"Biology","topic":"Vacuole and Lysosomes","questions":10,"marks":10,"time_minutes":5},{"id":62,"subject":"Biology","topic":"Golgi Apparatus","questions":10,"marks":10,"time_minutes":5},{"id":63,"subject":"Biology","topic":"Cell Theory","questions":10,"marks":10,"time_minutes":4},{"id":64,"subject":"Biology","topic":"Plant Cell vs Animal Cell","questions":10,"marks":10,"time_minutes":6},{"id":65,"subject":"Biology","topic":"Cell Organelles - Nucleus","questions":10,"marks":10,"time_minutes":5},{"id":66,"subject":"Biology","topic":"Unicellular and Multicellular Organisms","questions":10,"marks":10,"time_minutes":5},{"id":67,"subject":"Biology","topic":"Cell Membrane and Cell Wall","questions":10,"marks":10,"time_minutes":6},{"id":68,"subject":"Biology","topic":"Prokaryotic and Eukaryotic Cells","questions":10,"marks":10,"time_minutes":7},{"id":69,"subject":"Biology","topic":"Endoplasmic Reticulum and Ribosomes","questions":10,"marks":10,"time_minutes":5},{"id":70,"subject":"Biology","topic":"Vacuole and Lysosomes","questions":10,"marks":10,"time_minutes":4},{"id":71,"subject":"Biology","topic":"Golgi Apparatus","questions":10,"marks":10,"time_minutes":6},{"id":72,"subject":"Biology","topic":"Cell Organelles - Mitochondria and Plastids","questions":10,"marks":10,"time_minutes":7},{"id":73,"subject":"Biology","topic":"Cell Theory","questions":10,"marks":10,"time_minutes":4},{"id":74,"subject":"Biology","topic":"Cell Membrane and Cell Wall","questions":10,"marks":10,"time_minutes":5},{"id":75,"subject":"Biology","topic":"Plant Cell vs Animal Cell","questions":10,"marks":9,"time_minutes":6},{"id":76,"subject":"Biology","topic":"Unicellular and Multicellular Organisms","questions":10,"marks":10,"time_minutes":4},{"id":77,"subject":"Biology","topic":"Cell Organelles - Nucleus","questions":10,"marks":10,"time_minutes":5},{"id":78,"subject":"Biology","topic":"Golgi Apparatus","questions":10,"marks":10,"time_minutes":6},{"id":79,"subject":"Maths","topic":"Introduction to Trigonometry","questions":10,"marks":10,"time_minutes":5},{"id":80,"subject":"Maths","topic":"Angles - Types and Measurement","questions":10,"marks":10,"time_minutes":6},{"id":81,"subject":"Maths","topic":"Trigonometric Ratios","questions":10,"marks":10,"time_minutes":7},{"id":82,"subject":"Maths","topic":"Trigonometric Values of Standard Angles","questions":10,"marks":10,"time_minutes":5},{"id":83,"subject":"Maths","topic":"Trigonometric Identities","questions":10,"marks":7,"time_minutes":7},{"id":84,"subject":"Maths","topic":"Complementary Angles in Trigonometry","questions":10,"marks":10,"time_minutes":6},{"id":85,"subject":"Maths","topic":"Applications of Trigonometry","questions":10,"marks":10,"time_minutes":7},{"id":86,"subject":"Maths","topic":"Degree and Radian Measure","questions":10,"marks":10,"time_minutes":4},{"id":87,"subject":"Maths","topic":"Sine and Cosine Functions","questions":10,"marks":10,"time_minutes":5},{"id":88,"subject":"Maths","topic":"Trigonometric Ratios of Complementary Angles","questions":10,"marks":10,"time_minutes":6},{"id":89,"subject":"Maths","topic":"Introduction to Trigonometry","questions":10,"marks":10,"time_minutes":4},{"id":90,"subject":"Maths","topic":"Trigonometric Ratios","questions":10,"marks":10,"time_minutes":6},{"id":91,"subject":"Maths","topic":"Trigonometric Values of Standard Angles","questions":10,"marks":10,"time_minutes":5},{"id":92,"subject":"Maths","topic":"Trigonometric Identities","questions":10,"marks":10,"time_minutes":7},{"id":93,"subject":"Maths","topic":"Angles - Types and Measurement","questions":10,"marks":10,"time_minutes":5},{"id":94,"subject":"Maths","topic":"Applications of Trigonometry","questions":10,"marks":10,"time_minutes":7},{"id":95,"subject":"Maths","topic":"Degree and Radian Measure","questions":10,"marks":10,"time_minutes":4},{"id":96,"subject":"Maths","topic":"Sine and Cosine Functions","questions":10,"marks":10,"time_minutes":5},{"id":97,"subject":"Maths","topic":"Complementary Angles in Trigonometry","questions":10,"marks":10,"time_minutes":6},{"id":98,"subject":"Maths","topic":"Trigonometric Ratios of Complementary Angles","questions":10,"marks":10,"time_minutes":6},{"id":99,"subject":"Maths","topic":"Introduction to Trigonometry","questions":10,"marks":10,"time_minutes":5},{"id":100,"subject":"Maths","topic":"Trigonometric Ratios","questions":10,"marks":10,"time_minutes":6},{"id":101,"subject":"Maths","topic":"Trigonometric Values of Standard Angles","questions":10,"marks":10,"time_minutes":5},{"id":102,"subject":"Maths","topic":"Trigonometric Identities","questions":10,"marks":10,"time_minutes":7},{"id":103,"subject":"Maths","topic":"Applications of Trigonometry","questions":10,"marks":10,"time_minutes":6},{"id":104,"subject":"Maths","topic":"Angles - Types and Measurement","questions":10,"marks":10,"time_minutes":4},{"id":105,"subject":"Maths","topic":"Degree and Radian Measure","questions":10,"marks":10,"time_minutes":5},{"id":106,"subject":"Maths","topic":"Sine and Cosine Functions","questions":10,"marks":10,"time_minutes":6},{"id":107,"subject":"Physics","topic":"Uniform and Non-Uniform Motion","questions":10,"marks":10,"time_minutes":5},{"id":108,"subject":"Physics","topic":"Velocity-Time Graphs","questions":10,"marks":10,"time_minutes":6}];
+
+const COLORS = {
+  Physics:   '#38bdf8',
+  Chemistry: '#a78bfa',
+  Biology:   '#34d399',
+  Maths:     '#fb923c'
+};
+
+const PAGE_SIZE = 20;
+let filtered = [...RAW];
+let currentPage = 1;
+let sortKey = 'id';
+let sortDir = 'asc';
+let activeSubject = 'All';
+let searchQuery = '';
+
+// ── Helpers ──
+function avg(arr) { return arr.reduce((a,b)=>a+b,0)/arr.length; }
+function subjectData(s) { return RAW.filter(r=>r.subject===s); }
+
+// ── Init stat cards ──
+function buildStatCards() {
+  const total = RAW.length;
+  const perfectCount = RAW.filter(r=>r.marks===10).length;
+  const belowEight = RAW.filter(r=>r.marks<8).length;
+  const overallAvg = avg(RAW.map(r=>r.marks));
+  const avgTime = avg(RAW.map(r=>r.time_minutes));
+
+  const cards = [
+    { label:'Total Tests', value: total, sub:'across 4 subjects', accent:'#38bdf8' },
+    { label:'Perfect 10/10', value: `${perfectCount}`, sub:`${((perfectCount/total)*100).toFixed(0)}% of all tests`, accent:'#facc15' },
+    { label:'Overall Avg', value: overallAvg.toFixed(2), sub:'out of 10', accent:'#34d399' },
+    { label:'Avg Time', value: `${avgTime.toFixed(1)}m`, sub:'per test session', accent:'#a78bfa' },
+    { label:'Below 8', value: belowEight, sub:`${((belowEight/total)*100).toFixed(1)}% error rate`, accent:'#f87171' },
+    { label:'Subjects', value: 4, sub:'Chapter 1 each', accent:'#fb923c' },
+  ];
+
+  document.getElementById('stat-cards').innerHTML = cards.map(c=>`
+    <div class="stat-card" style="--accent:${c.accent}">
+      <div class="stat-label">${c.label}</div>
+      <div class="stat-value">${c.value}</div>
+      <div class="stat-sub">${c.sub}</div>
+    </div>
+  `).join('');
+}
+
+// ── Subject cards ──
+function buildSubjectCards() {
+  const subjects = ['Physics','Chemistry','Biology','Maths'];
+  const container = document.getElementById('subject-cards');
+  container.innerHTML = subjects.map(s => {
+    const data = subjectData(s);
+    const marks = data.map(r=>r.marks);
+    const avgMark = avg(marks);
+    const perfect = marks.filter(m=>m===10).length;
+    const avgTime = avg(data.map(r=>r.time_minutes));
+    const color = COLORS[s];
+    return `
+      <div class="subj-card" style="--scolor:${color}" onclick="filterSubject('${s}')">
+        <div class="subj-header">
+          <span class="subj-name">${s}</span>
+          <span class="subj-count">${data.length} tests</span>
+        </div>
+        <div class="subj-avg">
+          <span class="subj-avg-num">${avgMark.toFixed(2)}</span>
+          <span class="subj-avg-denom">/ 10 avg</span>
+        </div>
+        <div class="subj-bar-track">
+          <div class="subj-bar-fill" style="width:${avgMark*10}%; background:${color}"></div>
+        </div>
+        <div class="subj-stats-row">
+          <div class="subj-mini">
+            <div class="subj-mini-label">Perfect</div>
+            <div class="subj-mini-val">${perfect} <span style="color:${color};font-size:11px">${((perfect/data.length)*100).toFixed(0)}%</span></div>
+          </div>
+          <div class="subj-mini">
+            <div class="subj-mini-label">Avg Time</div>
+            <div class="subj-mini-val">${avgTime.toFixed(1)} min</div>
+          </div>
+          <div class="subj-mini">
+            <div class="subj-mini-label">Topics</div>
+            <div class="subj-mini-val">${[...new Set(data.map(r=>r.topic))].length}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── Filters ──
+function buildFilters() {
+  const subjects = ['All','Physics','Chemistry','Biology','Maths'];
+  document.getElementById('subj-filters').innerHTML = subjects.map(s=>{
+    const color = s==='All' ? '#6b7280' : COLORS[s];
+    return `<button class="filter-btn ${s===activeSubject?'active':''}" 
+      style="--btn-color:${color}" 
+      onclick="filterSubject('${s}')">${s}</button>`;
+  }).join('');
+}
+
+function filterSubject(s) {
+  activeSubject = s;
+  currentPage = 1;
+  buildFilters();
+  applyFilters();
+}
+
+document.getElementById('search').addEventListener('input', e=>{
+  searchQuery = e.target.value.toLowerCase();
+  currentPage = 1;
+  applyFilters();
+});
+
+document.getElementById('sort-select').addEventListener('change', e=>{
+  const [k, d] = e.target.value.split('-');
+  sortKey = k; sortDir = d;
+  applyFilters();
+});
+
+document.querySelectorAll('.th-sort').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const key = th.dataset.key;
+    if(sortKey===key) sortDir = sortDir==='asc'?'desc':'asc';
+    else { sortKey=key; sortDir='asc'; }
+    document.querySelectorAll('.th-sort').forEach(t=>{
+      t.classList.remove('sorted');
+      t.querySelector('.sort-icon').textContent = '↕';
+    });
+    th.classList.add('sorted');
+    th.querySelector('.sort-icon').textContent = sortDir==='asc'?'↑':'↓';
+    applyFilters();
+  });
+});
+
+function applyFilters() {
+  filtered = RAW.filter(r=>{
+    const matchSubject = activeSubject==='All' || r.subject===activeSubject;
+    const matchSearch  = !searchQuery || r.topic.toLowerCase().includes(searchQuery) || r.subject.toLowerCase().includes(searchQuery);
+    return matchSubject && matchSearch;
+  });
+  filtered.sort((a,b)=>{
+    let av = a[sortKey], bv = b[sortKey];
+    if(typeof av==='string') av=av.toLowerCase(), bv=bv.toLowerCase();
+    if(av<bv) return sortDir==='asc'?-1:1;
+    if(av>bv) return sortDir==='asc'?1:-1;
+    return 0;
+  });
+  renderTable();
+  renderPagination();
+}
+
+// ── Table render ──
+function renderTable() {
+  const tbody = document.getElementById('tbody');
+  const start = (currentPage-1)*PAGE_SIZE;
+  const page  = filtered.slice(start, start+PAGE_SIZE);
+
+  if(!page.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><h3>No results found</h3><p>Try adjusting your filters or search term.</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = page.map((r,i) => {
+    const color = COLORS[r.subject];
+    const isPerfect = r.marks === 10;
+    const isLow     = r.marks < 8;
+    const pips = Array.from({length:10}, (_,k)=>{
+      const filled = k < r.marks;
+      const cls = filled ? (isPerfect ? 'pip filled perfect' : isLow ? 'pip filled low' : 'pip filled') : 'pip';
+      return `<span class="${cls}" style="${filled&&!isPerfect&&!isLow?'--pc:'+color:''}"></span>`;
+    }).join('');
+    const scoreClass = isPerfect ? 'marks-num perfect-score' : isLow ? 'marks-num low-score' : 'marks-num';
+    return `<tr style="animation-delay:${i*18}ms">
+      <td class="td-id">${r.id}</td>
+      <td><span class="subj-pill" style="--sc:${color}"><span class="subj-dot"></span>${r.subject}</span></td>
+      <td class="td-topic">${r.topic}</td>
+      <td class="td-qs">${r.questions}</td>
+      <td class="td-marks">
+        <div class="marks-bar">
+          <div class="marks-pip-row">${pips}</div>
+          <span class="${scoreClass}">${r.marks}/10</span>
+        </div>
+      </td>
+      <td class="td-time">${r.time_minutes} min</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Pagination ──
+function renderPagination() {
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const start = (currentPage-1)*PAGE_SIZE+1;
+  const end   = Math.min(currentPage*PAGE_SIZE, filtered.length);
+  const pag   = document.getElementById('pagination');
+
+  const pageNums = [];
+  for(let p=1; p<=totalPages; p++) {
+    if(p===1||p===totalPages||Math.abs(p-currentPage)<=1)
+      pageNums.push(p);
+    else if(Math.abs(p-currentPage)===2)
+      pageNums.push('…');
+  }
+  const dedupe = [...new Set(pageNums)];
+
+  pag.innerHTML = `
+    <span class="page-info">Showing ${filtered.length ? start : 0}–${end} of ${filtered.length}</span>
+    <div class="page-btns">
+      <button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>← Prev</button>
+      ${dedupe.map(p=>p==='…'
+        ? `<button class="page-btn" disabled>…</button>`
+        : `<button class="page-btn ${p===currentPage?'current':''}" onclick="goPage(${p})">${p}</button>`
+      ).join('')}
+      <button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===totalPages||totalPages===0?'disabled':''}>Next →</button>
+    </div>
+  `;
+}
+
+function goPage(p) {
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  if(p<1||p>totalPages) return;
+  currentPage = p;
+  renderTable();
+  renderPagination();
+  document.querySelector('.table-wrap').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// ── Boot ──
+buildStatCards();
+buildSubjectCards();
+buildFilters();
+applyFilters();
+</script>
+</body>
+</html>
